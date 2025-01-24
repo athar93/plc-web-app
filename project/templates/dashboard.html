@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>Real-Time Data Dashboard</h1>
+    <canvas id="realtimeChart" width="800" height="400"></canvas>
+
+    <script>
+        const ctx = document.getElementById('realtimeChart').getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [], // Timestamps
+                datasets: [
+                    {
+                        label: 'Temperature',
+                        data: [], // Temperature values
+                        borderColor: 'red',
+                        fill: false
+                    },
+                    {
+                        label: 'Pressure',
+                        data: [], // Pressure values
+                        borderColor: 'blue',
+                        fill: false
+                    }
+                ]
+            },
+            options: {
+                scales: {
+                    x: { type: 'time', time: { unit: 'second' } },
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+        async function fetchData() {
+            const response = await fetch('/latest-data');
+            const data = await response.json();
+
+            const timestamps = data.map(d => d.timestamp);
+            const temperature = data.filter(d => d.variable === 'temperature').map(d => d.value);
+            const pressure = data.filter(d => d.variable === 'pressure').map(d => d.value);
+
+            chart.data.labels = timestamps;
+            chart.data.datasets[0].data = temperature;
+            chart.data.datasets[1].data = pressure;
+            chart.update();
+        }
+
+        setInterval(fetchData, 500); // Fetch every 500ms
+
+    </script>
+</body>
+</html>

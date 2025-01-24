@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PLC Data Visualization</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <h1>PLC Data Visualization</h1>
+    <div id="chart"></div>
+    <script>
+        const fetchData = async () => {
+            const response = await fetch('/data');
+            const data = await response.json();
+
+            // Parse data for different variables
+            const temperatureData = data.filter(d => d.variable === 'temperature');
+            const pressureData = data.filter(d => d.variable === 'pressure');
+
+            // Update chart
+            Plotly.newPlot("chart", [
+                {
+                    x: temperatureData.map(d => d.timestamp),
+                    y: temperatureData.map(d => d.value),
+                    mode: "lines+markers",
+                    name: "Temperature"
+                },
+                {
+                    x: pressureData.map(d => d.timestamp),
+                    y: pressureData.map(d => d.value),
+                    mode: "lines+markers",
+                    name: "Pressure"
+                }
+            ], {
+                title: "PLC Data Visualization",
+                xaxis: { title: "Timestamp" },
+                yaxis: { title: "Values" },
+            });
+        };
+
+        setInterval(fetchData, 500); // Fetch data every 500ms
+    </script>
+
+</body>
+</html>
